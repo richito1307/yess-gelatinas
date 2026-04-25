@@ -2,55 +2,56 @@
 title Yess - Backend
 chcp 65001 >nul
 
-REM -------------------------------------------------------
-REM  Auto-deteccion de JAVA_HOME
-REM -------------------------------------------------------
+echo Buscando Java...
 
-REM 1. Si ya esta definida en el sistema, usarla directamente
-if defined JAVA_HOME (
-    echo [OK] JAVA_HOME del sistema: %JAVA_HOME%
+REM 1. Si JAVA_HOME ya esta definida en el sistema
+if defined JAVA_HOME goto :verificar
+
+REM 2. Oracle JDK 21
+for /d %%d in ("C:\Program Files\Java\jdk-21*") do set "JAVA_HOME=%%d"
+if defined JAVA_HOME goto :verificar
+
+REM 3. Adoptium / Eclipse Temurin 21
+for /d %%d in ("C:\Program Files\Eclipse Adoptium\jdk-21*") do set "JAVA_HOME=%%d"
+if defined JAVA_HOME goto :verificar
+
+REM 4. Microsoft JDK 21
+for /d %%d in ("C:\Program Files\Microsoft\jdk-21*") do set "JAVA_HOME=%%d"
+if defined JAVA_HOME goto :verificar
+
+REM 5. Amazon Corretto 21
+for /d %%d in ("C:\Program Files\Amazon Corretto\jdk21*") do set "JAVA_HOME=%%d"
+if defined JAVA_HOME goto :verificar
+
+REM 6. Oracle JDK 17
+for /d %%d in ("C:\Program Files\Java\jdk-17*") do set "JAVA_HOME=%%d"
+if defined JAVA_HOME goto :verificar
+
+REM 7. Adoptium JDK 17
+for /d %%d in ("C:\Program Files\Eclipse Adoptium\jdk-17*") do set "JAVA_HOME=%%d"
+if defined JAVA_HOME goto :verificar
+
+REM 8. Detectar desde java.exe en PATH
+for /f "delims=" %%i in ('where java 2^>nul') do (
+    if not defined JAVA_HOME set "_JEXE=%%i"
+)
+if defined _JEXE (
+    for %%i in ("%_JEXE%") do set "_JBIN=%%~dpi"
+    for %%i in ("%_JBIN:~0,-1%") do set "JAVA_HOME=%%~dpi"
+    set "JAVA_HOME=%JAVA_HOME:~0,-1%"
     goto :verificar
 )
 
-REM 2. Buscar JDK 21 en rutas comunes (Oracle, Adoptium, Microsoft, Amazon)
-for /d %%d in (
-    "C:\Program Files\Java\jdk-21*"
-    "C:\Program Files\Eclipse Adoptium\jdk-21*"
-    "C:\Program Files\Microsoft\jdk-21*"
-    "C:\Program Files\Amazon Corretto\jdk21*"
-    "C:\Program Files\Java\jdk21*"
-) do (
-    if exist "%%~d\bin\java.exe" (
-        set "JAVA_HOME=%%~d"
-        echo [OK] Java 21 encontrado en: %%~d
-        goto :verificar
-    )
-)
-
-REM 3. Buscar cualquier JDK 17+ via comando java en PATH
-for /f "delims=" %%i in ('where java 2^>nul') do (
-    if not defined JAVA_HOME (
-        set "_JAVA_EXE=%%i"
-        goto :desde_path
-    )
-)
 goto :no_java
 
-:desde_path
-REM Subir dos niveles: java.exe -> bin -> JDK
-for %%i in ("%_JAVA_EXE%") do set "_BIN=%%~dpi"
-for %%i in ("%_BIN:~0,-1%") do set "JAVA_HOME=%%~dpi"
-set "JAVA_HOME=%JAVA_HOME:~0,-1%"
-echo [OK] Java encontrado via PATH: %JAVA_HOME%
-
 :verificar
-REM Verificar que sea Java 17+
 if not exist "%JAVA_HOME%\bin\java.exe" (
-    echo [ERROR] JAVA_HOME no tiene java.exe: %JAVA_HOME%
+    echo [ERROR] La ruta de Java no es valida: %JAVA_HOME%
+    set "JAVA_HOME="
     goto :no_java
 )
 set "PATH=%JAVA_HOME%\bin;%PATH%"
-echo JAVA_HOME=%JAVA_HOME%
+echo [OK] Java: %JAVA_HOME%
 goto :run
 
 :no_java
@@ -59,9 +60,7 @@ echo [ERROR] No se encontro Java 17 o superior.
 echo.
 echo Instala Java 21 desde: https://adoptium.net
 echo Elige: Temurin 21 - Windows x64 .msi
-echo.
-echo Despues de instalar, cierra esta ventana y vuelve a ejecutar
-echo INICIAR_SISTEMA.bat
+echo Luego cierra esta ventana y ejecuta INICIAR_SISTEMA.bat de nuevo.
 echo.
 pause
 exit /b 1
