@@ -1,0 +1,28 @@
+# Java — archivos compilados (se regeneran con mvnw)
+sistema-yess/target/
+sistema-yess/.mvn/wrapper/maven-wrapper.jar
+
+# Node — dependencias y build (se regeneran con npm install / npm run build)
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Logs
+*.log
+logs/
+
+# Backups (archivos locales, no van al repo)
+YessBackups/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code (config local)
+.claude/
